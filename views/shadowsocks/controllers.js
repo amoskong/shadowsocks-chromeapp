@@ -76,6 +76,31 @@ angular.module('shadowsocks').controller('shadowsocks',
     });
   };
 
+  $scope.switchHost = function() {
+      chrome.runtime.sendMessage({
+        type: "SOCKS5OP",
+        action: 'disconnect'
+      }, function(info) {
+        $scope.showToast(info)
+      });
+
+    if ($scope.currentProfile.server == 'proxy1') {
+        $scope.currentProfile.server = 'proxy2';
+    } else {
+        $scope.currentProfile.server = 'proxy1';
+    }
+
+      $scope.save();
+      chrome.runtime.sendMessage({
+        type: "SOCKS5OP",
+        action: 'connect',
+        config: $scope.currentProfile
+      }, function(info) {
+        $scope.running = (info.indexOf('failed') == -1);
+        $scope.showToast(info);
+      });
+  };
+
   $scope.startStop = function() {
     if ($scope.running) {
       chrome.runtime.sendMessage({
